@@ -76,17 +76,23 @@ def read_mesh(meshfile, N):
     return x
 
 
-def read_mesh_state(meshfile, statefile, upsampling=0):
+def read_mesh_state(meshfile, statefile, upsampling=0, readmean=False):
     s = h5py.File(statefile)
-    nElems = s["DG_Solution"].shape[0]
-    N = s["DG_Solution"].shape[1] - 1
-    nVars = s["DG_Solution"].shape[4]
-    U = np.zeros(s["DG_Solution"].shape)
-    U[:] = s["DG_Solution"]
+    if "Mean" in s.keys() and readmean:
+        dataset_name = "Mean"
+        varNames = s.attrs['VarNames_Mean']
+    else:
+        dataset_name = "DG_Solution"
+        varNames = s.attrs['VarNames']
+    nElems = s[dataset_name].shape[0]
+    N = s[dataset_name].shape[1] - 1
+    nVars = s[dataset_name].shape[4]
+    U = np.zeros(s[dataset_name].shape)
+    U[:] = s[dataset_name]
     s.close()
     x = read_mesh(meshfile, N)
     if upsampling == 0:
-        info = {"nElems": nElems, "N": N, "nVars": nVars}
+        info = {"nElems": nElems, "N": N, "nVars": nVars, "varNames": varNames}
         return x, U, info
     else:
         if upsampling < 0:
@@ -102,5 +108,5 @@ def read_mesh_state(meshfile, statefile, upsampling=0):
         for iElem in range(nElems):
             x_new[iElem] = change_basis(x[iElem], A)
             U_new[iElem] = change_basis(U[iElem], A)
-        info = {"nElems": nElems, "N": N_new, "nVars": nVars}
+        info = {"nElems": nElems, "N": N_new, "nVars": nVars, "varNames": varNames}
         return x_new, U_new, info

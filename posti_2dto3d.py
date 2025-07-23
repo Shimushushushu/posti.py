@@ -31,7 +31,9 @@ def from2dto3d(meshfile_old, statefile_old, meshfile, statefile):
         for i in range(N + 1):
             for j in range(N + 1):
                 for k in range(N + 1):
-                    U[iElem, i, j, k] = swap.query(x[iElem, i, j, k], from2dto3d=True, N = N + 1)
+                    U[iElem, i, j, k] = swap.query(
+                        x[iElem, i, j, k], from2dto3d=True, N=N + 1
+                    )
         print(f"{iElem}/{nElems}", end="\r")
     print("")
     print(f"Max distance: {swap.max_distance()}")
