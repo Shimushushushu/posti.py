@@ -6,7 +6,7 @@ import h5py
 import numpy as np
 
 from posti.core import read_mesh
-from posti.walldistance import channel, faith, flatplate
+from posti.walldistance import channel, faith, flatplate, ramp
 
 
 def walldistance(meshfile, geometry, N):
@@ -23,6 +23,8 @@ def walldistance(meshfile, geometry, N):
                         d[iElem, i, j, k] = flatplate.walldistance(x[iElem, i, j, k])
                     elif geometry == "faith":
                         d[iElem, i, j, k] = faith.walldistance(x[iElem, i, j, k])
+                    elif geometry == "ramp":
+                        d[iElem, i, j, k] = ramp.walldistance(x[iElem, i, j, k])
         print(f"{iElem}/{nElems}", end="\r")
     print("")
     f = h5py.File("walldistance.h5", "w")
