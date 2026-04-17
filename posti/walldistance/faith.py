@@ -13,7 +13,7 @@ def faith_distance_squared(t, r, y):
     return (faith_geometry(t) - y) ** 2 + (t - r) ** 2
 
 
-def walldistance(coord):
+def walldistance(coord, _):
     # hill is located at x = 0, z = 0, hill height = 1
     x, y, z = coord
     r = (x**2 + z**2) ** 0.5

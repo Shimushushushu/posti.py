@@ -1,5 +1,4 @@
-def walldistance(coord):
-    # flatplate starts at x = 0
+def walldistance(coord, _):
     x, y, _ = coord
     if x >= 0:
         return y

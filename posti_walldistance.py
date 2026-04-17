@@ -1,33 +1,31 @@
 #!/usr/bin/env python3
 
 import argparse
+import importlib
 
 import h5py
 import numpy as np
 
 from posti.core import read_mesh
-from posti.walldistance import channel, faith, flatplate, ramp
 
 
-def walldistance(meshfile, geometry, N):
-    x = read_mesh(meshfile, N)
+def walldistance(meshfile, geometry, N, lobatto, args):
+    m = importlib.import_module(f"posti.walldistance.{geometry}")
+    x = read_mesh(meshfile, N, lobatto)
     nElems = x.shape[0]
     d = np.zeros((nElems, N + 1, N + 1, N + 1))
     for iElem in range(nElems):
         for i in range(N + 1):
             for j in range(N + 1):
                 for k in range(N + 1):
-                    if geometry == "channel":
-                        d[iElem, i, j, k] = channel.walldistance(x[iElem, i, j, k])
-                    elif geometry == "flatplate":
-                        d[iElem, i, j, k] = flatplate.walldistance(x[iElem, i, j, k])
-                    elif geometry == "faith":
-                        d[iElem, i, j, k] = faith.walldistance(x[iElem, i, j, k])
-                    elif geometry == "ramp":
-                        d[iElem, i, j, k] = ramp.walldistance(x[iElem, i, j, k])
+                    d[iElem, i, j, k] = m.walldistance(x[iElem, i, j, k], args)
         print(f"{iElem}/{nElems}", end="\r")
     print("")
-    f = h5py.File("walldistance.h5", "w")
+    if meshfile.endswith("_mesh.h5"):
+        wallfile = f"{meshfile[:-len('_mesh.h5')]}_walldistance.h5"
+    else:
+        wallfile = "walldistance.h5"
+    f = h5py.File(wallfile, "w")
     f["walldistance"] = d
     f.close()
 
@@ -37,5 +35,11 @@ if __name__ == "__main__":
     parser.add_argument("meshfile")
     parser.add_argument("geometry")
     parser.add_argument("N", type=int)
+    parser.add_argument("--lobatto", action="store_true")
+    parser.add_argument("--args", action="append", type=str)
     args = parser.parse_args()
-    walldistance(args.meshfile, args.geometry, args.N)
+    if args.args is None:
+        args_dict = {}
+    else:
+        args_dict = dict(s.split("=", 1) for s in args.args)
+    walldistance(args.meshfile, args.geometry, args.N, args.lobatto, args_dict)

@@ -1,7 +1,7 @@
-def walldistance(coord):
-    # half height is 1, centerline at y = 0
-    _, y, _ = coord
-    if y >= 0:
-        return 1 - y
+def walldistance(coord, args):
+    if "h" in args:
+        h = args["h"]
     else:
-        return y + 1
+        h = 1
+    _, y, _ = coord
+    return min(h - y, y + h)
